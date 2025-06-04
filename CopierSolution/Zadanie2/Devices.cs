@@ -39,6 +39,10 @@ namespace ver1
 
         public int Counter { get; private set; } = 0;
     }
+    public interface IFax : IDevice
+    {
+        void SendFax(in IDocument document, string recipientNumber);
+    }
 
     public interface IPrinter : IDevice
     {
@@ -55,26 +59,101 @@ namespace ver1
         // w przeciwnym przypadku nic się dzieje
         void Scan(out IDocument document, IDocument.FormatType formatType);
     }
+    public class MultifunctionalDevice : BaseDevice, IPrinter, IScanner, IFax
+    {
+        public int PrintCounter { get; private set; }
+        public int ScanCounter { get; private set; }
+        public int FaxCounter { get; private set; }
+
+        public void Print(in IDocument document)
+        {
+            if (GetState() == IDevice.State.on)
+            {
+                if (document == null)
+                {
+
+                    Console.WriteLine("Print: Cannot print a null document.");
+                    return;
+                }
+                PrintCounter++;
+                Console.WriteLine($"{DateTime.Now:yyyy.MM.dd HH:mm:ss} Print: {document.GetFileName()}");
+            }
+        }
+        public void Scan(out IDocument document, IDocument.FormatType formatType)
+        {
+            document = null;
+
+            if (GetState() == IDevice.State.on)
+            {
+                ScanCounter++;
+                string actualFileName = "";
+
+                switch (formatType)
+                {
+                    case IDocument.FormatType.TXT:
+                        actualFileName = $"TextScan{ScanCounter:D4}.txt";
+                        document = new TextDocument(actualFileName);
+                        break;
+                    case IDocument.FormatType.PDF:
+                        actualFileName = $"PDFScan{ScanCounter:D4}.pdf";
+                        document = new PDFDocument(actualFileName);
+                        break;
+                    case IDocument.FormatType.JPG:
+                        actualFileName = $"ImageScan{ScanCounter:D4}.jpg";
+                        document = new ImageDocument(actualFileName);
+                        break;
+                    default:
+                        Console.WriteLine("Scan: Unknown format. Document not created.");
+                        return;
+                }
+
+                if (document != null)
+                {
+                    Console.WriteLine($"{DateTime.Now:yyyy.MM.dd HH:mm:ss} Scan: {actualFileName}");
+                }
+            }
+        }
+        public void Scan(out IDocument document)
+        {
+            Scan(out document, IDocument.FormatType.JPG);
+        }
+        public void ScanAndPrint()
+        {
+            if (GetState() == IDevice.State.on)
+            {
+                Scan(out IDocument document1, IDocument.FormatType.JPG);
+                Print(document1);
+            }
+        }
+        public void SendFax(in IDocument document, string recipientNumber)
+        {
+            if (GetState() == IDevice.State.on && document != null && !string.IsNullOrWhiteSpace(recipientNumber))
+            {
+                FaxCounter++;
+                Console.WriteLine($"{DateTime.Now:dd.MM.yyyy HH:mm:ss} Fax: {document.GetFileName()} sent to {recipientNumber}");
+            }
+        }
+
+    }
     public class Copier : BaseDevice, IPrinter, IScanner
     {
         public int PrintCounter { get; private set; }
         public int ScanCounter { get; private set; }
 
-public void Print(in IDocument document)
-{
-    if (GetState() == IDevice.State.on)
+    public void Print(in IDocument document)
     {
-        if (document == null)
+        if (GetState() == IDevice.State.on)
         {
+            if (document == null)
+            {
             
-            Console.WriteLine("Print: Cannot print a null document.");
-            return;
+                Console.WriteLine("Print: Cannot print a null document.");
+                return;
+            }
+            PrintCounter++;
+            Console.WriteLine($"{DateTime.Now:yyyy.MM.dd HH:mm:ss} Print: {document.GetFileName()}");
         }
-        PrintCounter++;
-        Console.WriteLine($"{DateTime.Now:yyyy.MM.dd HH:mm:ss} Print: {document.GetFileName()}");
     }
-}
-
         public void Scan(out IDocument document, IDocument.FormatType formatType)
         {
             document = null;
