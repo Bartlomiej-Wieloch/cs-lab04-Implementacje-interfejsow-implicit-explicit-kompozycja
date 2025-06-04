@@ -54,7 +54,7 @@ namespace Zadanie2UnitTest
         public void MultifunctionalDevice_SendFax_DeviceOff()
         {
             var fax = new MultifunctionalDevice();
-            fax.PowerOff(); // Urządzenie wyłączone
+            fax.PowerOff(); 
             IDocument doc = new PDFDocument("fax_content.pdf");
             string recipient = "123456789";
 
@@ -73,7 +73,7 @@ namespace Zadanie2UnitTest
         {
             var fax = new MultifunctionalDevice();
             fax.PowerOn();
-            IDocument doc = null; // Dokument jest null
+            IDocument doc = null; 
             string recipient = "123456789";
 
             using (var consoleOutput = new ConsoleRedirectionToStringWriter())
@@ -82,8 +82,7 @@ namespace Zadanie2UnitTest
                 string output = consoleOutput.GetOutput();
 
                 Assert.IsFalse(output.Contains("Fax:"), "Output should not contain 'Fax:' for null document.");
-                // Jeśli dodałeś logowanie dla null dokumentu:
-                // Assert.IsTrue(output.Contains("Fax: Document is null."), "Output should indicate null document.");
+                
                 Assert.AreEqual(0, fax.FaxCounter, "FaxCounter should not be incremented for null document.");
             }
         }
@@ -94,16 +93,14 @@ namespace Zadanie2UnitTest
             var fax = new MultifunctionalDevice();
             fax.PowerOn();
             IDocument doc = new PDFDocument("fax_content.pdf");
-            string recipient = ""; // Pusty numer odbiorcy
-
+            string recipient = ""; 
             using (var consoleOutput = new ConsoleRedirectionToStringWriter())
             {
                 fax.SendFax(in doc, recipient);
                 string output = consoleOutput.GetOutput();
 
                 Assert.IsFalse(output.Contains("Fax:"), "Output should not contain 'Fax:' for empty recipient number.");
-                // Jeśli dodałeś logowanie dla pustego numeru:
-                // Assert.IsTrue(output.Contains("Fax: Recipient number is empty."), "Output should indicate empty recipient.");
+                
                 Assert.AreEqual(0, fax.FaxCounter, "FaxCounter should not be incremented for empty recipient number.");
             }
         }
@@ -114,7 +111,7 @@ namespace Zadanie2UnitTest
             var fax = new MultifunctionalDevice();
             fax.PowerOn();
             IDocument doc = new PDFDocument("fax_content.pdf");
-            string recipient = "   "; // Numer odbiorcy składający się tylko z białych znaków
+            string recipient = "   "; 
 
             using (var consoleOutput = new ConsoleRedirectionToStringWriter())
             {
@@ -136,14 +133,13 @@ namespace Zadanie2UnitTest
             string recipient1 = "111222333";
             string recipient2 = "444555666";
 
-            fax.SendFax(in doc1, recipient1); // Fax 1
-            fax.SendFax(in doc2, recipient2); // Fax 2
+            fax.SendFax(in doc1, recipient1); 
+            fax.SendFax(in doc2, recipient2); 
 
-            // Wyłączamy, próbujemy wysłać, włączamy, wysyłamy ponownie
             fax.PowerOff();
-            fax.SendFax(in doc1, recipient1); // Nie powinno wysłać
+            fax.SendFax(in doc1, recipient1); 
             fax.PowerOn();
-            fax.SendFax(in doc1, recipient2); // Fax 3
+            fax.SendFax(in doc1, recipient2); 
 
             Assert.AreEqual(3, fax.FaxCounter, "FaxCounter should count only successful faxes.");
         }
